@@ -5,7 +5,7 @@ import pl.igorbykowski.exchange_rates.currency.Currency;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record DiffBetweenBuyAndAskRateResponse(
+public record BidAskDifferenceResponse(
         Currency currencyCode,
         LocalDate date,
         BigDecimal majorDifference

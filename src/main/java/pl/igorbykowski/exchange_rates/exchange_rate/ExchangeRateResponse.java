@@ -1,4 +1,4 @@
-package pl.igorbykowski.exchange_rates.exchange_rate.average;
+package pl.igorbykowski.exchange_rates.exchange_rate;
 
 import pl.igorbykowski.exchange_rates.currency.Currency;
 

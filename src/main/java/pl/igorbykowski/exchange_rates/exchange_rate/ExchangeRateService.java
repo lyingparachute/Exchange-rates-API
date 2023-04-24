@@ -6,9 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.igorbykowski.exchange_rates.currency.Currency;
-import pl.igorbykowski.exchange_rates.exchange_rate.average.ExchangeRateResponse;
-import pl.igorbykowski.exchange_rates.exchange_rate.average.RateResponse;
-import pl.igorbykowski.exchange_rates.exchange_rate.difference.DiffBetweenBuyAndAskRateResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.difference.BidAskDifferenceResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
 
 import java.math.BigDecimal;
@@ -66,7 +64,7 @@ public class ExchangeRateService {
                 .anyMatch(c -> c.name().equals(code));
     }
 
-    public DiffBetweenBuyAndAskRateResponse getMajorDifferenceBetweenBuyAndAskRate(String currencyCode, int quotations) {
+    public BidAskDifferenceResponse getMajorDifferenceBetweenBuyAndAskRate(String currencyCode, int quotations) {
         String table = "C";
         Currency currency = getCurrencyCode(currencyCode);
         String url = String.format(NBP_API_URL, table, currency + "/last", quotations);
@@ -82,6 +80,6 @@ public class ExchangeRateService {
         Entry<LocalDate, BigDecimal> biggestDifference = collect.entrySet().stream()
                 .max(Entry.comparingByValue())
                 .get();
-        return new DiffBetweenBuyAndAskRateResponse(currency, biggestDifference.getKey(), biggestDifference.getValue());
+        return new BidAskDifferenceResponse(currency, biggestDifference.getKey(), biggestDifference.getValue());
     }
 }

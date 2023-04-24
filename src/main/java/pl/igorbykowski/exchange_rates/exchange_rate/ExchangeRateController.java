@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.igorbykowski.exchange_rates.exchange_rate.average.ExchangeRateResponse;
-import pl.igorbykowski.exchange_rates.exchange_rate.difference.DiffBetweenBuyAndAskRateResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.difference.BidAskDifferenceResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
 
 import java.time.LocalDate;
@@ -32,8 +31,8 @@ public class ExchangeRateController {
     }
 
     @GetMapping("/rates/{currencyCode}/{numOfQuotes}")
-    public ResponseEntity<DiffBetweenBuyAndAskRateResponse> getMajorDifference(@PathVariable("currencyCode") String currencyCode,
-                                                                               @PathVariable("numOfQuotes") int numOfQuotes) {
+    public ResponseEntity<BidAskDifferenceResponse> getMajorDifference(@PathVariable("currencyCode") String currencyCode,
+                                                                       @PathVariable("numOfQuotes") int numOfQuotes) {
         return ResponseEntity.ok(
                 service.getMajorDifferenceBetweenBuyAndAskRate(currencyCode, numOfQuotes));
     }
