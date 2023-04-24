@@ -1,4 +1,4 @@
-package pl.igorbykowski.exchange_rates.exchange_rate;
+package pl.igorbykowski.exchange_rates.exchange_rate.difference;
 
 import pl.igorbykowski.exchange_rates.currency.Currency;
 

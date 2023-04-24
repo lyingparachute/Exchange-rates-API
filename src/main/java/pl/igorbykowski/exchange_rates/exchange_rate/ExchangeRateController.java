@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.igorbykowski.exchange_rates.exchange_rate.average.ExchangeRateResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.difference.DiffBetweenBuyAndAskRateResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
 
 import java.time.LocalDate;

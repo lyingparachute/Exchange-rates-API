@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import pl.igorbykowski.exchange_rates.currency.Currency;
 import pl.igorbykowski.exchange_rates.exchange_rate.average.ExchangeRateResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.average.RateResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.difference.DiffBetweenBuyAndAskRateResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
 
 import java.math.BigDecimal;
