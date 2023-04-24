@@ -5,8 +5,8 @@ This project is a simple RESTful web API that queries data from the Narodowy Ban
 # Getting Started
 ## Prerequisites
 * Java 17
-* Spring-Boot 3
-* Maven 3
+* Spring-Boot 3.0.6
+* Maven 4.0.0
 * Docker (optional)
 
 ## Installing
