@@ -3,9 +3,11 @@ package pl.igorbykowski.exchange_rates.exchange_rate.average;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record AverageRate(
+public record RateResponse(
         String no,
         LocalDate effectiveDate,
-        BigDecimal mid
+        BigDecimal mid,
+        BigDecimal bid,
+        BigDecimal ask
 ) {
 }
