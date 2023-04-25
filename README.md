@@ -39,7 +39,7 @@ press CTRL+C to stop the app
 ```
 
 ## Test the application by making HTTP requests to the following endpoints:
-### Operation 1: Average exchange rate
+### Operation 1: Average exchange rate given currency code and date (formatted YYYY-MM-DD)
    * Endpoint:
         
           GET /api/v1/exchange-rates/average/{currencyCode}/{date}
@@ -54,7 +54,7 @@ press CTRL+C to stop the app
               "date": "2023-04-24", 
               "averageExchangeRate": 5.2176 
           }
-### Operation 2: Max and min average value
+### Operation 2: Max and min average value given currency code and the number of last quotations N (N <= 255)
    * Endpoint: 
    
          GET /api/v1/exchange-rates/min-max/{currencyCode}/{numOfQuotes}
@@ -69,7 +69,7 @@ press CTRL+C to stop the app
               "minAvgValue": 4.1905, 
               "maxAvgValue": 4.2917 
           }
-### Operation 3: Major difference between buy and ask rate
+### Operation 3: Major difference between buy and ask rate given currency code and the number of last quotations N (N <= 255)
    * Endpoint: 
    
          GET /api/v1/exchange-rates/difference/{currencyCode}/{numOfQuotes}
