@@ -58,7 +58,7 @@ public class ExchangeRateService {
                 ));
         Map.Entry<LocalDate, BigDecimal> biggestDifference = collect.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
-                .get();
+                .orElseThrow(() -> new IllegalArgumentException("Cannot get max value from received data."));
         return new BidAskDifferenceResponse(currency, currency.getDescription(), biggestDifference.getValue(), biggestDifference.getKey());
     }
 
