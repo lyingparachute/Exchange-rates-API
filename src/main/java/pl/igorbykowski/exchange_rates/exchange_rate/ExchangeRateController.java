@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.igorbykowski.exchange_rates.exchange_rate.NBP_api_response.ExchangeRateNBPResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.average.AverageExchangeRateResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.difference.BidAskDifferenceResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
 
@@ -18,8 +18,8 @@ public class ExchangeRateController {
     private final ExchangeRateService service;
 
     @GetMapping("average")
-    public ResponseEntity<ExchangeRateNBPResponse> getAverageExchangeRate(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                                                          @RequestParam("currencyCode") String currencyCode) {
+    public ResponseEntity<AverageExchangeRateResponse> getAverageExchangeRate(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+                                                                              @RequestParam("currencyCode") String currencyCode) {
         return ResponseEntity.ok(
                 service.getAverageExchangeRateByDateAndCurrency(currencyCode, date));
     }

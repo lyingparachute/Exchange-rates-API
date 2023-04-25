@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import pl.igorbykowski.exchange_rates.currency.Currency;
 import pl.igorbykowski.exchange_rates.exchange_rate.NBP_api_response.ExchangeRateNBPResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.NBP_api_response.RateNBPResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.average.AverageExchangeRateResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.difference.BidAskDifferenceResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
 
@@ -25,10 +26,10 @@ public class ExchangeRateService {
     private static final String NBP_API_URL = "http://api.nbp.pl/api/exchangerates/rates/%s/%s/%s";
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public ExchangeRateNBPResponse getAverageExchangeRateByDateAndCurrency(String currencyCode, LocalDate date) {
+    public AverageExchangeRateResponse getAverageExchangeRateByDateAndCurrency(String currencyCode, LocalDate date) {
         String table = "A";
         String url = String.format(NBP_API_URL, table, getCurrencyCode(currencyCode), getDateString(date));
-        ResponseEntity<ExchangeRateNBPResponse> response = restTemplate.exchange(url, HttpMethod.GET, null,
+        ResponseEntity<AverageExchangeRateResponse> response = restTemplate.exchange(url, HttpMethod.GET, null,
                 new ParameterizedTypeReference<>() {
                 });
         return response.getBody();
