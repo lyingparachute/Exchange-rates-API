@@ -28,7 +28,7 @@ public class ExchangeRateController {
     public ResponseEntity<MinMaxAverageValueResponse> getMinMaxAverageValue(@RequestParam("currencyCode") String currencyCode,
                                                                             @RequestParam("quotations") int quotations) {
         return ResponseEntity.ok(
-                service.getMinMaxAverageValue(currencyCode, quotations));
+                service.getMinMaxAverageValueForXDays(currencyCode, quotations));
     }
 
     @GetMapping("/rates/{currencyCode}/{numOfQuotes}")

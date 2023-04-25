@@ -2,7 +2,6 @@ package pl.igorbykowski.exchange_rates.exchange_rate;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.igorbykowski.exchange_rates.currency.Currency;
@@ -20,85 +19,101 @@ import java.util.stream.Collectors;
 
 @Service
 public class ExchangeRateService {
-    private static final String NBP_API_URL = "http://api.nbp.pl/api/exchangerates/rates/%s/%s/%s";
+    private static final String NBP_API_BASE_URL = "http://api.nbp.pl/api/exchangerates/rates/";
+    private static final String EXCHANGE_RATE_TABLE_A_API_URL = NBP_API_BASE_URL + "A/%s/%s";
+    private static final String EXCHANGE_RATE_TABLE_B_API_URL = NBP_API_BASE_URL + "B/%s/%s";
+    private static final String EXCHANGE_RATE_TABLE_C_API_URL = NBP_API_BASE_URL + "C/%s/%s";
     private final RestTemplate restTemplate = new RestTemplate();
 
     public AverageExchangeRateResponse getAverageExchangeRateByDateAndCurrency(String currencyCode, LocalDate date) {
-        String table = "A";
-        Currency currency = getCurrencyCode(currencyCode);
-        String url = String.format(NBP_API_URL, table, currency, getDateString(date));
-        ResponseEntity<ExchangeRateNBPResponse> response = getNBPApiResponse(url);
+        Currency currency = getCurrencyByCode(currencyCode);
+        String exchangeRateApiUrl = String.format(EXCHANGE_RATE_TABLE_A_API_URL, currency, getDateString(date));
+        ExchangeRateNBPResponse response = getExchangeRateApiResponse(exchangeRateApiUrl);
 
-        BigDecimal averageExchangeRate = Objects.requireNonNull(response.getBody()).rates().get(0).mid();
         return AverageExchangeRateResponse.builder()
                 .currencyCode(currency)
                 .currencyName(currency.getDescription())
                 .date(date)
-                .averageExchangeRate(averageExchangeRate)
+                .averageExchangeRate(getAverageExchangeRate(response))
                 .build();
-    }
-
-    public MinMaxAverageValueResponse getMinMaxAverageValue(String currencyCode, int topCount) {
-        String table = "B";
-        Currency currency = getCurrencyCode(currencyCode);
-        String url = String.format(NBP_API_URL, table, currency + "/last", topCount);
-        ResponseEntity<ExchangeRateNBPResponse> response = getNBPApiResponse(url);
-
-        List<BigDecimal> midRates = getListOfAverageExchangeRates(response);
-        BigDecimal minValue = Collections.min(midRates);
-        BigDecimal maxValue = Collections.max(midRates);
-        return MinMaxAverageValueResponse.builder()
-                .currencyCode(currency)
-                .currencyName(currency.getDescription())
-                .minAvgValue(minValue)
-                .maxAvgValue(maxValue)
-                .build();
-    }
-
-    public BidAskDifferenceResponse getMajorDifferenceBetweenBuyAndAskRate(String currencyCode, int quotations) {
-        String table = "C";
-        Currency currency = getCurrencyCode(currencyCode);
-        String url = String.format(NBP_API_URL, table, currency + "/last", quotations);
-        ResponseEntity<ExchangeRateNBPResponse> response = getNBPApiResponse(url);
-
-        Map<LocalDate, BigDecimal> collect = Objects.requireNonNull(response.getBody()).rates().stream()
-                .collect(Collectors.toMap(
-                        RateNBPResponse::effectiveDate,
-                        rate -> rate.ask().subtract(rate.bid())
-                ));
-        Map.Entry<LocalDate, BigDecimal> difference = collect.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .orElseThrow(() -> new IllegalArgumentException("Cannot get max value from received data."));
-        return BidAskDifferenceResponse.builder()
-                .currencyCode(currency)
-                .currencyName(currency.getDescription())
-                .date(difference.getKey())
-                .majorDifference(difference.getValue())
-                .build();
-    }
-
-    private ResponseEntity<ExchangeRateNBPResponse> getNBPApiResponse(String url) {
-        return restTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<>() {
-                });
-    }
-
-    private List<BigDecimal> getListOfAverageExchangeRates(ResponseEntity<ExchangeRateNBPResponse> response) {
-        return Objects.requireNonNull(response.getBody())
-                .rates()
-                .stream()
-                .map(RateNBPResponse::mid)
-                .toList();
     }
 
     private String getDateString(LocalDate date) {
         return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
-    private Currency getCurrencyCode(String code) {
-        if (isValidCurrencyCode(code))
-            return Currency.valueOf(code);
-        else throw new IllegalArgumentException("Wrong currencyCode currencyCode");
+    private BigDecimal getAverageExchangeRate(ExchangeRateNBPResponse response) {
+        return response.rates().stream().findFirst()
+                .map(RateNBPResponse::mid)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot get mid value from received data."));
+    }
+
+    public MinMaxAverageValueResponse getMinMaxAverageValueForXDays(String currencyCode, int topCount) {
+        Currency currency = getCurrencyByCode(currencyCode);
+        String exchangeRateApiUrl = String.format(EXCHANGE_RATE_TABLE_B_API_URL, currency + "/last", topCount);
+        ExchangeRateNBPResponse response = getExchangeRateApiResponse(exchangeRateApiUrl);
+
+        return MinMaxAverageValueResponse.builder()
+                .currencyCode(currency)
+                .currencyName(currency.getDescription())
+                .minAvgValue(getMinAvgRateFromExchangeRateResponse(response))
+                .maxAvgValue(getMaxAvgRateFromExchangeRateResponse(response))
+                .build();
+    }
+
+    private BigDecimal getMinAvgRateFromExchangeRateResponse(ExchangeRateNBPResponse response) {
+        return Collections.min(getAvgRatesFromExchangeRateResponse(response));
+    }
+
+    private BigDecimal getMaxAvgRateFromExchangeRateResponse(ExchangeRateNBPResponse response) {
+        return Collections.max(getAvgRatesFromExchangeRateResponse(response));
+    }
+
+    private List<BigDecimal> getAvgRatesFromExchangeRateResponse(ExchangeRateNBPResponse response) {
+        return response.rates().stream()
+                .map(RateNBPResponse::mid)
+                .toList();
+    }
+
+    public BidAskDifferenceResponse getMajorDifferenceBetweenBuyAndAskRate(String currencyCode, int quotations) {
+        Currency currency = getCurrencyByCode(currencyCode);
+        String exchangeRateApiUrl = String.format(EXCHANGE_RATE_TABLE_C_API_URL, currency + "/last", quotations);
+        ExchangeRateNBPResponse response = getExchangeRateApiResponse(exchangeRateApiUrl);
+        Map.Entry<LocalDate, BigDecimal> biggestDifference = getBuyAskMajorDifference(response);
+
+        return BidAskDifferenceResponse.builder()
+                .currencyCode(currency)
+                .currencyName(currency.getDescription())
+                .date(biggestDifference.getKey())
+                .majorDifference(biggestDifference.getValue())
+                .build();
+    }
+
+    private static Map.Entry<LocalDate, BigDecimal> getBuyAskMajorDifference(ExchangeRateNBPResponse response) {
+        return getBuyAskDifferenceByDate(response).entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .orElseThrow(() -> new IllegalArgumentException("Cannot get max value from received data."));
+    }
+
+    private static Map<LocalDate, BigDecimal> getBuyAskDifferenceByDate(ExchangeRateNBPResponse response) {
+        return response.rates().stream()
+                .collect(Collectors.toMap(
+                        RateNBPResponse::effectiveDate,
+                        rate -> rate.ask().subtract(rate.bid())
+                ));
+    }
+
+    private ExchangeRateNBPResponse getExchangeRateApiResponse(String exchangeRateApiUrl) {
+        return Optional.ofNullable(restTemplate.exchange(exchangeRateApiUrl, HttpMethod.GET, null,
+                        new ParameterizedTypeReference<ExchangeRateNBPResponse>() {
+                        }).getBody())
+                .orElseThrow(() -> new IllegalArgumentException("Cannot get exchange rate response from received data."));
+    }
+
+    private Currency getCurrencyByCode(String currencyCode) {
+        if (isValidCurrencyCode(currencyCode))
+            return Currency.valueOf(currencyCode);
+        else throw new IllegalArgumentException("Wrong currencyCode: " + currencyCode);
     }
 
     private boolean isValidCurrencyCode(String code) {
@@ -106,4 +121,3 @@ public class ExchangeRateService {
                 .anyMatch(c -> c.name().equals(code));
     }
 }
-
