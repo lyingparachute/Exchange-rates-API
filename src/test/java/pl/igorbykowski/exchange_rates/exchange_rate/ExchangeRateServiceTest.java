@@ -3,6 +3,8 @@ package pl.igorbykowski.exchange_rates.exchange_rate;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -66,10 +68,10 @@ class ExchangeRateServiceTest {
             assertThat(response.averageExchangeRate()).isEqualTo(rateNbpApiResponse1.mid());
         }
 
-        @Test
-        void throwsIllegalArgumentException_givenInvalidCurrencyCode() {
+        @ParameterizedTest
+        @ValueSource(strings = {"", "  ", "XYZ"})
+        void throwsIllegalArgumentException_givenInvalidCurrencyCode(String currencyCode) {
             // Given
-            String currencyCode = "XYZ";
             LocalDate date = LocalDate.of(2023, 4, 24);
 
             // When, Then
@@ -125,10 +127,10 @@ class ExchangeRateServiceTest {
             assertThat(response.maxAvgValue()).isEqualTo(rateResponse3.mid());
         }
 
-        @Test
-        void throwsIllegalArgumentException_givenInvalidCurrencyCode() {
+        @ParameterizedTest
+        @ValueSource(strings = {"", "  ", "XYZ"})
+        void throwsIllegalArgumentException_givenInvalidCurrencyCode(String currencyCode) {
             // Given
-            String currencyCode = "XYZ";
             int numOfQuotes = 10;
 
             // When, Then
@@ -187,10 +189,10 @@ class ExchangeRateServiceTest {
             assertThat(response.majorDifference()).isEqualTo(expectedDifferenceResult);
         }
 
-        @Test
-        void throwsIllegalArgumentException_givenInvalidCurrencyCode() {
+        @ParameterizedTest
+        @ValueSource(strings = {"", "  ", "XYZ"})
+        void throwsIllegalArgumentException_givenInvalidCurrencyCode(String currencyCode) {
             // Given
-            String currencyCode = "XYZ";
             int numOfQuotes = 10;
 
             // When, Then
