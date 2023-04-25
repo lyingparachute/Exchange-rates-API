@@ -1,4 +1,4 @@
-package pl.igorbykowski.exchange_rates.exchange_rate.NBP_api_response;
+package pl.igorbykowski.exchange_rates.exchange_rate.nbp_api_response;
 
 import pl.igorbykowski.exchange_rates.currency.Currency;
 
