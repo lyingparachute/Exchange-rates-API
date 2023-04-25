@@ -1,5 +1,6 @@
 package pl.igorbykowski.exchange_rates.exchange_rate;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ExchangeRateService {
     private static final String NBP_API_BASE_URL = "http://api.nbp.pl/api/exchangerates/rates/";
     private static final String EXCHANGE_RATE_TABLE_A_API_URL = NBP_API_BASE_URL + "A/%s/%s";
     private static final String EXCHANGE_RATE_TABLE_C_API_URL = NBP_API_BASE_URL + "C/%s/%s";
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     public AverageExchangeRateResponse getAverageExchangeRateByDateAndCurrency(String currencyCode, LocalDate date) {
         Currency currency = parseCurrencyCode(currencyCode);
