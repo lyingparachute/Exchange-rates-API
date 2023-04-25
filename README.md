@@ -69,8 +69,13 @@ docker run -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DA
    
           GET /exchanges/GBP/2023-01-02
    * Response: 
-                    
-            { "currencyCode": "GBP", "date": "2023-01-02", "averageExchangeRate": 5.2768 }
+
+          { 
+              "currencyCode": "GBP",
+              "currencyName": "Pound Sterling", 
+              "date": "2023-04-24", 
+              "averageExchangeRate": 5.2176 
+          }
 ### Operation 2: Max and min average value
    * Endpoint: 
    
@@ -79,15 +84,25 @@ docker run -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DA
     
          GET /quotes/USD/10
    * Response: 
-    
-         { "currencyCode": "USD", "maxAvgValue": 3.8000, "minAvgValue": 3.7000 }
+
+          { 
+              "currencyCode": "USD",
+              "currencyName": "US Dollar", 
+              "minAvgValue": 3.6707, 
+              "maxAvgValue": 4.0110 
+          }
 ### Operation 3: Major difference between buy and ask rate
    * Endpoint: 
    
          GET /rates/{currencyCode}/{numOfQuotes}
    * Example: 
          
-         GET /rates/EUR/5
+         GET /rates/EUR/10
    * Response: 
-   
-         { "currencyCode": "EUR", "majorDifference": 0.0500 }
+
+          { 
+              "currencyCode": "EUR",
+              "currencyName": "Euro", 
+              "majorDifference": 0.0934, 
+              "date": "2023-04-12" 
+          }
