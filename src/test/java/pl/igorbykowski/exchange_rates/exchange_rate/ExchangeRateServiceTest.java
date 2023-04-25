@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
@@ -69,7 +72,8 @@ class ExchangeRateServiceTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"", "  ", "XYZ"})
+        @NullAndEmptySource
+        @ValueSource(strings = "XYZ")
         void throwsIllegalArgumentException_givenInvalidCurrencyCode(String currencyCode) {
             // Given
             LocalDate date = LocalDate.of(2023, 4, 24);
@@ -128,7 +132,8 @@ class ExchangeRateServiceTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"", "  ", "XYZ"})
+        @NullAndEmptySource
+        @ValueSource(strings = "XYZ")
         void throwsIllegalArgumentException_givenInvalidCurrencyCode(String currencyCode) {
             // Given
             int numOfQuotes = 10;
@@ -190,7 +195,8 @@ class ExchangeRateServiceTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"", "  ", "XYZ"})
+        @NullAndEmptySource
+        @ValueSource(strings = "XYZ")
         void throwsIllegalArgumentException_givenInvalidCurrencyCode(String currencyCode) {
             // Given
             int numOfQuotes = 10;
