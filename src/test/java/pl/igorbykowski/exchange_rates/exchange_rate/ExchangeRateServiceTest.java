@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import pl.igorbykowski.exchange_rates.currency.Currency;
 import pl.igorbykowski.exchange_rates.exchange_rate.average.AverageExchangeRateResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.difference.BidAskDifferenceResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.nbp_api_response.ExchangeRateNBPResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.nbp_api_response.RateNBPResponse;
@@ -123,7 +124,48 @@ class ExchangeRateServiceTest {
 
     @Nested
     class GetMajorDifferenceBetweenBuyAndAskRate {
+        @Test
+        void returnsAverageExchangeRate_givenValidCurrencyCode_andNumOfQuotes() {
+            // Given
+            String currencyCode = "USD";
+            Currency currency = Currency.valueOf(currencyCode);
+            int numOfQuotes = 10;
 
+
+            RateNBPResponse rateResponse1 = createRateNbpApiResponse1(LocalDate.of(2023, 3, 20));
+            RateNBPResponse rateResponse2 = createRateNbpApiResponse2(LocalDate.of(2023, 3, 21));
+            RateNBPResponse rateResponse3 = createRateNbpApiResponse3(LocalDate.of(2023, 3, 22));
+            ExchangeRateNBPResponse exchangeRateNBPResponse = createExchangeRateNbpApiResponse(
+                    currency, List.of(rateResponse1, rateResponse2, rateResponse3));
+            BigDecimal expectedDifferenceResult = rateResponse3.ask().subtract(rateResponse3.bid());
+
+            when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
+                    ArgumentMatchers.<ParameterizedTypeReference<ExchangeRateNBPResponse>>any()))
+                    .thenReturn(ResponseEntity.ok(exchangeRateNBPResponse));
+
+            // When
+            BidAskDifferenceResponse response = service.getMajorDifferenceBetweenBuyAndAskRate(currencyCode, numOfQuotes);
+
+            // Then
+            verify(restTemplate).exchange(anyString(), eq(HttpMethod.GET), isNull(),
+                    ArgumentMatchers.<ParameterizedTypeReference<ExchangeRateNBPResponse>>any());
+            assertThat(response.currencyCode()).isEqualTo(currency);
+            assertThat(response.currencyName()).isEqualTo(currency.getDescription());
+            assertThat(response.date()).isEqualTo(rateResponse3.effectiveDate());
+            assertThat(response.majorDifference()).isEqualTo(expectedDifferenceResult);
+        }
+
+        @Test
+        void throwsThrowNoSuchElementException_givenInvalidCurrencyCode() {
+            // Given
+            String currencyCode = "XYZ";
+            int numOfQuotes = 10;
+
+            // When, Then
+            assertThatThrownBy(() -> service.getMajorDifferenceBetweenBuyAndAskRate(currencyCode, numOfQuotes))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Wrong currencyCode: " + currencyCode);
+        }
     }
 
     private ExchangeRateNBPResponse createExchangeRateNbpApiResponse(Currency currency, List<RateNBPResponse> rates) {
@@ -136,7 +178,7 @@ class ExchangeRateServiceTest {
                 date,
                 BigDecimal.valueOf(1.1),
                 BigDecimal.valueOf(2.1),
-                BigDecimal.valueOf(3.1)
+                BigDecimal.valueOf(2.2)
         );
     }
 
@@ -156,7 +198,7 @@ class ExchangeRateServiceTest {
                 date,
                 BigDecimal.valueOf(1.3),
                 BigDecimal.valueOf(2.3),
-                BigDecimal.valueOf(3.3)
+                BigDecimal.valueOf(3.9)
         );
     }
 }
