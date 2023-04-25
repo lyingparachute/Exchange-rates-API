@@ -7,7 +7,8 @@ import java.time.LocalDate;
 
 public record BidAskDifferenceResponse(
         Currency currencyCode,
-        LocalDate date,
-        BigDecimal majorDifference
+        String currencyName,
+        BigDecimal majorDifference,
+        LocalDate date
 ) {
 }

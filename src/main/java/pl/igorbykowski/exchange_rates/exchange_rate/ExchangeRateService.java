@@ -6,11 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.igorbykowski.exchange_rates.currency.Currency;
-import pl.igorbykowski.exchange_rates.exchange_rate.nbp_api_response.ExchangeRateNBPResponse;
-import pl.igorbykowski.exchange_rates.exchange_rate.nbp_api_response.RateNBPResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.average.AverageExchangeRateResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.difference.BidAskDifferenceResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.nbp_api_response.ExchangeRateNBPResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.nbp_api_response.RateNBPResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,9 +27,8 @@ public class ExchangeRateService {
         String table = "A";
         Currency currency = getCurrencyCode(currencyCode);
         String url = String.format(NBP_API_URL, table, currency, getDateString(date));
-        ResponseEntity<ExchangeRateNBPResponse> response = restTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<>() {
-                });
+        ResponseEntity<ExchangeRateNBPResponse> response = getNBPApiResponse(url);
+
         BigDecimal averageExchangeRate = Objects.requireNonNull(response.getBody()).rates().get(0).mid();
         return new AverageExchangeRateResponse(currency, currency.getDescription(), date, averageExchangeRate);
     }
@@ -38,30 +37,21 @@ public class ExchangeRateService {
         String table = "B";
         Currency currency = getCurrencyCode(currencyCode);
         String url = String.format(NBP_API_URL, table, currency + "/last", topCount);
+        ResponseEntity<ExchangeRateNBPResponse> response = getNBPApiResponse(url);
 
-        ResponseEntity<ExchangeRateNBPResponse> response = restTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<>() {
-                });
-        List<BigDecimal> midRates = response.getBody()
-                .rates()
-                .stream()
-                .map(RateNBPResponse::mid)
-                .toList();
+        List<BigDecimal> midRates = getListOfAverageExchangeRates(response);
         BigDecimal minValue = Collections.min(midRates);
         BigDecimal maxValue = Collections.max(midRates);
-
-        return new MinMaxAverageValueResponse(currency, minValue, maxValue);
+        return new MinMaxAverageValueResponse(currency, currency.getDescription(), minValue, maxValue);
     }
 
     public BidAskDifferenceResponse getMajorDifferenceBetweenBuyAndAskRate(String currencyCode, int quotations) {
         String table = "C";
         Currency currency = getCurrencyCode(currencyCode);
         String url = String.format(NBP_API_URL, table, currency + "/last", quotations);
+        ResponseEntity<ExchangeRateNBPResponse> response = getNBPApiResponse(url);
 
-        ResponseEntity<ExchangeRateNBPResponse> response = restTemplate.exchange(url, HttpMethod.GET, null,
-                new ParameterizedTypeReference<>() {
-                });
-        Map<LocalDate, BigDecimal> collect = response.getBody().rates().stream()
+        Map<LocalDate, BigDecimal> collect = Objects.requireNonNull(response.getBody()).rates().stream()
                 .collect(Collectors.toMap(
                         RateNBPResponse::effectiveDate,
                         rate -> rate.ask().subtract(rate.bid())
@@ -69,7 +59,21 @@ public class ExchangeRateService {
         Map.Entry<LocalDate, BigDecimal> biggestDifference = collect.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .get();
-        return new BidAskDifferenceResponse(currency, biggestDifference.getKey(), biggestDifference.getValue());
+        return new BidAskDifferenceResponse(currency, currency.getDescription(), biggestDifference.getValue(), biggestDifference.getKey());
+    }
+
+    private ResponseEntity<ExchangeRateNBPResponse> getNBPApiResponse(String url) {
+        return restTemplate.exchange(url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<>() {
+                });
+    }
+
+    private List<BigDecimal> getListOfAverageExchangeRates(ResponseEntity<ExchangeRateNBPResponse> response) {
+        return Objects.requireNonNull(response.getBody())
+                .rates()
+                .stream()
+                .map(RateNBPResponse::mid)
+                .toList();
     }
 
     private String getDateString(LocalDate date) {
