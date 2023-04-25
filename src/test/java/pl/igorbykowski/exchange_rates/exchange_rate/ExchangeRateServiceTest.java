@@ -21,6 +21,7 @@ import pl.igorbykowski.exchange_rates.exchange_rate.nbp_api_response.RateNBPResp
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -66,15 +67,30 @@ class ExchangeRateServiceTest {
         }
 
         @Test
-        void throwsThrowNoSuchElementException_givenInvalidCurrencyCode() {
+        void throwsIllegalArgumentException_givenInvalidCurrencyCode() {
             // Given
             String currencyCode = "XYZ";
             LocalDate date = LocalDate.of(2023, 4, 24);
 
             // When, Then
             assertThatThrownBy(() -> service.getAverageExchangeRateByDateAndCurrency(currencyCode, date))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Wrong currencyCode: " + currencyCode);
+                    .isExactlyInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Wrong currencyCode: " + currencyCode);
+        }
+
+        @Test
+        void throwsNoSuchElementException_givenNullResponseEntityBody() {
+            // Given
+            String currencyCode = "USD";
+            LocalDate date = LocalDate.of(2023, 4, 24);
+            when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
+                    ArgumentMatchers.<ParameterizedTypeReference<ExchangeRateNBPResponse>>any()))
+                    .thenReturn(ResponseEntity.ok(null));
+
+            // When, Then
+            assertThatThrownBy(() -> service.getAverageExchangeRateByDateAndCurrency(currencyCode, date))
+                    .isExactlyInstanceOf(NoSuchElementException.class)
+                    .hasMessage("Cannot get exchange rate response from received data.");
         }
     }
 
@@ -110,15 +126,31 @@ class ExchangeRateServiceTest {
         }
 
         @Test
-        void throwsThrowNoSuchElementException_givenInvalidCurrencyCode() {
+        void throwsIllegalArgumentException_givenInvalidCurrencyCode() {
             // Given
             String currencyCode = "XYZ";
             int numOfQuotes = 10;
 
             // When, Then
             assertThatThrownBy(() -> service.getMinMaxAverageValueForXDays(currencyCode, numOfQuotes))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isExactlyInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Wrong currencyCode: " + currencyCode);
+        }
+
+        @Test
+        void throwsNoSuchElementException_givenNullResponseEntityBody() {
+            // Given
+            String currencyCode = "USD";
+            int numOfQuotes = 10;
+
+            when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
+                    ArgumentMatchers.<ParameterizedTypeReference<ExchangeRateNBPResponse>>any()))
+                    .thenReturn(ResponseEntity.ok(null));
+
+            // When, Then
+            assertThatThrownBy(() -> service.getMinMaxAverageValueForXDays(currencyCode, numOfQuotes))
+                    .isExactlyInstanceOf(NoSuchElementException.class)
+                    .hasMessage("Cannot get exchange rate response from received data.");
         }
     }
 
@@ -156,15 +188,31 @@ class ExchangeRateServiceTest {
         }
 
         @Test
-        void throwsThrowNoSuchElementException_givenInvalidCurrencyCode() {
+        void throwsIllegalArgumentException_givenInvalidCurrencyCode() {
             // Given
             String currencyCode = "XYZ";
             int numOfQuotes = 10;
 
             // When, Then
             assertThatThrownBy(() -> service.getMajorDifferenceBetweenBuyAndAskRate(currencyCode, numOfQuotes))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isExactlyInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Wrong currencyCode: " + currencyCode);
+        }
+
+        @Test
+        void throwsNoSuchElementException_givenNullResponseEntityBody() {
+            // Given
+            String currencyCode = "USD";
+            int numOfQuotes = 10;
+
+            when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
+                    ArgumentMatchers.<ParameterizedTypeReference<ExchangeRateNBPResponse>>any()))
+                    .thenReturn(ResponseEntity.ok(null));
+
+            // When, Then
+            assertThatThrownBy(() -> service.getMajorDifferenceBetweenBuyAndAskRate(currencyCode, numOfQuotes))
+                    .isExactlyInstanceOf(NoSuchElementException.class)
+                    .hasMessage("Cannot get exchange rate response from received data.");
         }
     }
 
