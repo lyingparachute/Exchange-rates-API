@@ -7,7 +7,6 @@ This project is a simple RESTful web API that queries data from the Narodowy Ban
 * Java 17
 * Spring-Boot 3.0.6
 * Maven 4.0.0
-* Docker (optional)
 
 ## Installing
 ### 1. Clone this repository
@@ -30,44 +29,23 @@ Go to project directory
 ```
 
 ## Running the application
-1. Start application server with docker-compose
-    ```bash
-    docker-compose up --build
-    ```
-    ***note** - it might take a while to pull and build docker images*
-    ```
-    press CTRL+C to stop the app
-    ```
-2. Run app - second time
-   * START APP
-     ```bash
-     docker-compose start
-     ```
-   * STOP APP
-      ```bash
-     docker-compose stop
-     ```
-   * REMOVE NETWORK
-     ```bash
-     docker-compose down
-     ```
-### Alternative way of running app locally
-
-Create docker image and run project with IntelliJ:
-
+### 1. Start application in IntelliJ or in terminal:
 ```bash
-docker run -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=classroom --rm -d mysql
+mvn spring-boot:run
 ```
 
+```
+press CTRL+C to stop the app
+```
 
 ## Test the application by making HTTP requests to the following endpoints:
 ### Operation 1: Average exchange rate
    * Endpoint:
         
-            GET /exchanges/{currencyCode}/{date}
+          GET /api/v1/exchange-rates/average/{currencyCode}/{date}
    * Example: 
    
-          GET /exchanges/GBP/2023-01-02
+          GET /api/v1/exchange-rates/GBP/2023-01-02
    * Response: 
 
           { 
@@ -79,25 +57,25 @@ docker run -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DA
 ### Operation 2: Max and min average value
    * Endpoint: 
    
-         GET /quotes/{currencyCode}/{numOfQuotes}
+         GET /api/v1/exchange-rates/min-max/{currencyCode}/{numOfQuotes}
    * Example: 
     
-         GET /quotes/USD/10
+         GET /api/v1/exchange-rates/min-max/USD/10
    * Response: 
 
           { 
               "currencyCode": "USD",
               "currencyName": "US Dollar", 
-              "minAvgValue": 3.6707, 
-              "maxAvgValue": 4.0110 
+              "minAvgValue": 4.1905, 
+              "maxAvgValue": 4.2917 
           }
 ### Operation 3: Major difference between buy and ask rate
    * Endpoint: 
    
-         GET /rates/{currencyCode}/{numOfQuotes}
+         GET /api/v1/exchange-rates/difference/{currencyCode}/{numOfQuotes}
    * Example: 
          
-         GET /rates/EUR/10
+         GET /api/v1/exchange-rates/difference/EUR/10
    * Response: 
 
           { 

@@ -21,13 +21,12 @@ import java.util.stream.Collectors;
 public class ExchangeRateService {
     private static final String NBP_API_BASE_URL = "http://api.nbp.pl/api/exchangerates/rates/";
     private static final String EXCHANGE_RATE_TABLE_A_API_URL = NBP_API_BASE_URL + "A/%s/%s";
-    private static final String EXCHANGE_RATE_TABLE_B_API_URL = NBP_API_BASE_URL + "B/%s/%s";
     private static final String EXCHANGE_RATE_TABLE_C_API_URL = NBP_API_BASE_URL + "C/%s/%s";
     private final RestTemplate restTemplate = new RestTemplate();
 
     public AverageExchangeRateResponse getAverageExchangeRateByDateAndCurrency(String currencyCode, LocalDate date) {
-        Currency currency = getCurrencyByCode(currencyCode);
-        String exchangeRateApiUrl = String.format(EXCHANGE_RATE_TABLE_A_API_URL, currency, getDateString(date));
+        Currency currency = parseCurrencyCode(currencyCode);
+        String exchangeRateApiUrl = String.format(EXCHANGE_RATE_TABLE_A_API_URL, currency, formatDateToString(date));
         ExchangeRateNBPResponse response = getExchangeRateApiResponse(exchangeRateApiUrl);
 
         return AverageExchangeRateResponse.builder()
@@ -38,19 +37,19 @@ public class ExchangeRateService {
                 .build();
     }
 
-    private String getDateString(LocalDate date) {
+    private String formatDateToString(LocalDate date) {
         return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
     private BigDecimal getAverageExchangeRate(ExchangeRateNBPResponse response) {
         return response.rates().stream().findFirst()
                 .map(RateNBPResponse::mid)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot get mid value from received data."));
+                .orElseThrow(() -> new NoSuchElementException("Cannot get mid value from received data."));
     }
 
     public MinMaxAverageValueResponse getMinMaxAverageValueForXDays(String currencyCode, int topCount) {
-        Currency currency = getCurrencyByCode(currencyCode);
-        String exchangeRateApiUrl = String.format(EXCHANGE_RATE_TABLE_B_API_URL, currency + "/last", topCount);
+        Currency currency = parseCurrencyCode(currencyCode);
+        String exchangeRateApiUrl = String.format(EXCHANGE_RATE_TABLE_A_API_URL, currency + "/last", topCount);
         ExchangeRateNBPResponse response = getExchangeRateApiResponse(exchangeRateApiUrl);
 
         return MinMaxAverageValueResponse.builder()
@@ -76,7 +75,7 @@ public class ExchangeRateService {
     }
 
     public BidAskDifferenceResponse getMajorDifferenceBetweenBuyAndAskRate(String currencyCode, int quotations) {
-        Currency currency = getCurrencyByCode(currencyCode);
+        Currency currency = parseCurrencyCode(currencyCode);
         String exchangeRateApiUrl = String.format(EXCHANGE_RATE_TABLE_C_API_URL, currency + "/last", quotations);
         ExchangeRateNBPResponse response = getExchangeRateApiResponse(exchangeRateApiUrl);
         Map.Entry<LocalDate, BigDecimal> biggestDifference = getBuyAskMajorDifference(response);
@@ -92,7 +91,7 @@ public class ExchangeRateService {
     private static Map.Entry<LocalDate, BigDecimal> getBuyAskMajorDifference(ExchangeRateNBPResponse response) {
         return getBuyAskDifferenceByDate(response).entrySet().stream()
                 .max(Map.Entry.comparingByValue())
-                .orElseThrow(() -> new IllegalArgumentException("Cannot get max value from received data."));
+                .orElseThrow(() -> new NoSuchElementException("Cannot get max value from received data."));
     }
 
     private static Map<LocalDate, BigDecimal> getBuyAskDifferenceByDate(ExchangeRateNBPResponse response) {
@@ -107,10 +106,10 @@ public class ExchangeRateService {
         return Optional.ofNullable(restTemplate.exchange(exchangeRateApiUrl, HttpMethod.GET, null,
                         new ParameterizedTypeReference<ExchangeRateNBPResponse>() {
                         }).getBody())
-                .orElseThrow(() -> new IllegalArgumentException("Cannot get exchange rate response from received data."));
+                .orElseThrow(() -> new NoSuchElementException("Cannot get exchange rate response from received data."));
     }
 
-    private Currency getCurrencyByCode(String currencyCode) {
+    private Currency parseCurrencyCode(String currencyCode) {
         if (isValidCurrencyCode(currencyCode))
             return Currency.valueOf(currencyCode);
         else throw new IllegalArgumentException("Wrong currencyCode: " + currencyCode);
