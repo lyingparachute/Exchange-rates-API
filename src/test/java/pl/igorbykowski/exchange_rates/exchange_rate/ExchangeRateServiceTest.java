@@ -4,9 +4,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
@@ -42,7 +40,6 @@ class ExchangeRateServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
-
 
     @Nested
     class GetAverageExchangeRateByDateAndCurrency {
@@ -169,7 +166,6 @@ class ExchangeRateServiceTest {
             String currencyCode = "USD";
             Currency currency = Currency.valueOf(currencyCode);
             int numOfQuotes = 10;
-
 
             RateNBPResponse rateResponse1 = createRateNbpApiResponse1(LocalDate.of(2023, 3, 20));
             RateNBPResponse rateResponse2 = createRateNbpApiResponse2(LocalDate.of(2023, 3, 21));
