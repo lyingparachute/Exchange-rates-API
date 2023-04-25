@@ -4,8 +4,8 @@ import pl.igorbykowski.exchange_rates.currency.Currency;
 
 import java.util.List;
 
-public record ExchangeRateResponse(
+public record ExchangeRateNBPResponse(
         Currency currencyCode,
-        List<RateResponse> rates
+        List<RateNBPResponse> rates
 ) {
 }
