@@ -2,10 +2,13 @@ package pl.igorbykowski.exchange_rates.exchange_rate.average;
 
 import pl.igorbykowski.exchange_rates.currency.Currency;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public record AverageExchangeRateResponse(
         Currency currencyCode,
-        List<AverageRateResponse> rates
+        String currencyName,
+        LocalDate date,
+        BigDecimal averageExchangeRate
 ) {
 }
