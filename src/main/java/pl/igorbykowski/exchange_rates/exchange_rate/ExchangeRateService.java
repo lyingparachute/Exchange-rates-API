@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.igorbykowski.exchange_rates.currency.Currency;
+import pl.igorbykowski.exchange_rates.exchange_rate.NBP_api_response.ExchangeRateNBPResponse;
+import pl.igorbykowski.exchange_rates.exchange_rate.NBP_api_response.RateNBPResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.difference.BidAskDifferenceResponse;
 import pl.igorbykowski.exchange_rates.exchange_rate.min_max.MinMaxAverageValueResponse;
 
