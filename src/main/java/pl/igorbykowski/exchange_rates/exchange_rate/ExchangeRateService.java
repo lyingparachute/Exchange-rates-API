@@ -30,7 +30,12 @@ public class ExchangeRateService {
         ResponseEntity<ExchangeRateNBPResponse> response = getNBPApiResponse(url);
 
         BigDecimal averageExchangeRate = Objects.requireNonNull(response.getBody()).rates().get(0).mid();
-        return new AverageExchangeRateResponse(currency, currency.getDescription(), date, averageExchangeRate);
+        return AverageExchangeRateResponse.builder()
+                .currencyCode(currency)
+                .currencyName(currency.getDescription())
+                .date(date)
+                .averageExchangeRate(averageExchangeRate)
+                .build();
     }
 
     public MinMaxAverageValueResponse getMinMaxAverageValue(String currencyCode, int topCount) {
@@ -42,7 +47,12 @@ public class ExchangeRateService {
         List<BigDecimal> midRates = getListOfAverageExchangeRates(response);
         BigDecimal minValue = Collections.min(midRates);
         BigDecimal maxValue = Collections.max(midRates);
-        return new MinMaxAverageValueResponse(currency, currency.getDescription(), minValue, maxValue);
+        return MinMaxAverageValueResponse.builder()
+                .currencyCode(currency)
+                .currencyName(currency.getDescription())
+                .minAvgValue(minValue)
+                .maxAvgValue(maxValue)
+                .build();
     }
 
     public BidAskDifferenceResponse getMajorDifferenceBetweenBuyAndAskRate(String currencyCode, int quotations) {
@@ -56,10 +66,15 @@ public class ExchangeRateService {
                         RateNBPResponse::effectiveDate,
                         rate -> rate.ask().subtract(rate.bid())
                 ));
-        Map.Entry<LocalDate, BigDecimal> biggestDifference = collect.entrySet().stream()
+        Map.Entry<LocalDate, BigDecimal> difference = collect.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .orElseThrow(() -> new IllegalArgumentException("Cannot get max value from received data."));
-        return new BidAskDifferenceResponse(currency, currency.getDescription(), biggestDifference.getValue(), biggestDifference.getKey());
+        return BidAskDifferenceResponse.builder()
+                .currencyCode(currency)
+                .currencyName(currency.getDescription())
+                .date(difference.getKey())
+                .majorDifference(difference.getValue())
+                .build();
     }
 
     private ResponseEntity<ExchangeRateNBPResponse> getNBPApiResponse(String url) {
