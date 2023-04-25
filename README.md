@@ -3,8 +3,8 @@
 This project is a simple RESTful web API that queries data from the Narodowy Bank Polski's public APIs and returns relevant information from them.
 The API supports three operations:
 1. Average exchange rate given currency code and date (formatted YYYY-MM-DD).
-2. Max and min average value given a currency code and the number of last quotations N (where N <= 255).
-3. Major difference between buy and ask rate given a currency code and the number of last quotations N (where N <= 255).
+2. Max and min average exchange rate value given a currency code and the number of last quotations N (where N <= 255).
+3. Major difference between buy and ask exchange rate given a currency code and the number of last quotations N (where N <= 255).
 
 # Getting Started
 ## Prerequisites
